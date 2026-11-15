@@ -3,7 +3,7 @@
 **Quantum-powered EV battery design you can talk to.**
 
 🌐 Live app: **[evoltlab.design](https://evoltlab.design)** · backup: [evibe-quantum-lab.base44.app](https://evibe-quantum-lab.base44.app)
-Built by Team EVibe at Hack The Nest 2026 (Eastern Michigan University).
+Built by Team EVibe (Adrianna Pedron) at Hack The Nest 2026 (Eastern Michigan University).
 
 EVolt Lab is a virtual EV battery lab for people with no technical background. You design a battery (the liquid inside it, how much liquid, electrode layer thickness, battery size, outside temperature) and simulate how it could ideally perform: range, fast-charge time, charging power, weight, cost and durability. Volt, a voice assistant, explains every number in plain words and can tune the design for you.
 
