@@ -54,18 +54,32 @@ python evolt_quantum.py --backend exact --only lih     # exact classical check, 
 python evolt_quantum.py --backend qr --live --only lih # one molecule on Quantum Rings, step by step
 python evolt_quantum.py --backend qr                   # all liquids -> results/evolt_candidates.csv
 python evolt_quantum.py --backend qr --scan            # + lithium "grip curves"
+python evolt_quantum.py --backend qr --stretch         # LiH bond-stretch demo: where quantum beats the simple method
 ```
 Backends: `exact` (statevector), `local` (Qiskit BasicSimulator with shots), `qr` (Quantum Rings).
 
-## Results
+## Results (Quantum Rings, 4 qubits, 2,048 shots per measurement)
 
-_Filled in from `results/evolt_candidates.csv` after the Quantum Rings run._
+Binding energy = how tightly the solvent grips a lithium ion (higher = tighter grip = slower charging).
 
-| Liquid | Binding energy, VQE (kcal/mol) | Exact (kcal/mol) | Max error (mHa) |
-|---|---|---|---|
-| Ethylene carbonate (EC) | | | |
-| Dimethyl carbonate (DMC) | | | |
-| Dimethyl ether (DME) | | | |
+| Molecule | Role in app | Binding, VQE on Quantum Rings (kcal/mol) | Exact classical (kcal/mol) | Max energy error (mHa) |
+|---|---|---|---|---|
+| Ethylene carbonate (EC) | Electrolyte option (industry standard) | 50.15 | 50.09 | 0.33 |
+| Dimethyl ether (DME) | Electrolyte option | 48.57 | 48.34 | 0.29 |
+| Dimethyl carbonate (DMC) | Electrolyte option | _pending_ | _pending_ | |
+| Ammonia | Validation molecule only | 48.97 | 49.33 | 1.27 |
+| Water | Validation molecule only | 46.98 | 46.62 | 0.29 |
+
+- **Every VQE energy is within chemical accuracy (1.6 mHa) of the exact answer**, and every VQE binding energy is within 0.4 kcal/mol of the exact one.
+- The ordering (EC grips tightest) matches the expected trend for carbonate vs. ether solvents.
+- Absolute values are higher than published gas-phase measurements (e.g. about 34 kcal/mol for Li⁺–water), as expected for a small basis set, fixed geometries and no basis-set-superposition correction. EVolt Lab uses the **differences between solvents**, not the absolute values.
+- Grip curves (`results/evolt_grip_curves.csv`): 32 additional VQE runs pulling Li⁺ away from each molecule; VQE and exact curves agree within 0.7 kcal/mol at every point.
+
+### Why quantum? The LiH bond-stretch demo
+
+Near their natural shape, these battery molecules behave simply: the simple classical method (Hartree–Fock) is already close, and the quantum circuit confirms the exact answer. To show where quantum methods matter, `--stretch` pulls a Li–H bond apart from 1.0 to 5.0 Å. As the bond stretches, the simple method drifts away from the exact answer while VQE on Quantum Rings stays on it, and the qubits' measurements shift from one electron arrangement (`0101`) to a mix including `1010`, the kind of electron behaviour the simple method cannot describe. Output: `results/evolt_lih_stretch.csv` and `results/lih_stretch.png`.
+
+The ansatz starts at the Hartree–Fock state with parameters chosen so the first knob moves both electrons together (a pair excitation), plus one optimizer restart, so VQE does not get stuck at the Hartree–Fock answer when correlation is strong.
 
 ## Honest limitations
 

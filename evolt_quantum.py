@@ -21,6 +21,7 @@ Examples
     python evolt_quantum.py --backend local                        # all candidates
     python evolt_quantum.py --backend qr                           # all candidates, Quantum Rings
     python evolt_quantum.py --backend qr --scan                    # + "grip curves" (Li+ pulled away)
+    python evolt_quantum.py --backend qr --stretch                 # LiH bond-stretch demo
     python evolt_quantum.py --backend qr --live --only li+ec --force   # live demo for judges
 
 Results are cached per molecule in results/<backend>/, so a crashed run
@@ -46,6 +47,7 @@ N_QUBITS = 4
 CHEM_ACCURACY_MHA = 1.6
 LIVE = False
 SCAN_DISTANCES = [1.6, 1.8, 2.0, 2.3, 2.7, 3.2, 4.0, 5.0]   # Angstrom, Li+ to binding atom
+STRETCH_DISTANCES = [1.0, 1.3, 1.6, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0]   # Angstrom, Li-H bond
 
 # --------------------------------------------------------------------------
 # Molecule geometries (Angstrom). Fixed, reasonable structures, not optimized.
@@ -128,9 +130,11 @@ def li_complex(solvent, d):
     return s["atoms"] + [("Li", tuple(li))]
 
 def get_molecule(key):
-    """Keys: lih, li+, <solvent>, li+<solvent>, li+<solvent>@<distance>."""
+    """Keys: lih, lih@<distance>, li+, <solvent>, li+<solvent>, li+<solvent>@<distance>."""
     if key == "lih":
         return LIH, 0
+    if key.startswith("lih@"):
+        return [("Li", (0, 0, 0)), ("H", (0, 0, float(key[4:])))], 0
     if key == "li+":
         return [("Li", (0, 0, 0))], 1
     if key in SOLVENTS:
@@ -146,11 +150,26 @@ DEFAULT_KEYS = ["lih", "li+"] + [k for s in SOLVENTS for k in (s, "li+" + s)]
 # --------------------------------------------------------------------------
 # Classical side: PySCF builds the 2-electron / 2-orbital active space.
 # --------------------------------------------------------------------------
-def classical_reference(atoms, charge):
+def _sigma_active_space(mol, mf):
+    """For a bond along z: pick the bonding orbital and the lowest antibonding (sigma) orbital,
+    skipping pi orbitals, so stretching the bond shows real electron correlation."""
+    homo = int(np.where(mf.mo_occ > 0)[0][-1])
+    pi_idx = [i for i, lab in enumerate(mol.ao_labels()) if "px" in lab or "py" in lab]
+    for j in range(homo + 1, mf.mo_coeff.shape[1]):
+        c2 = mf.mo_coeff[:, j] ** 2
+        if c2[pi_idx].sum() / c2.sum() < 0.1:
+            return [homo, j]
+    return [homo, homo + 1]
+
+def classical_reference(atoms, charge, sigma_bond=False):
     mol = gto.M(atom=atoms, basis=BASIS, charge=charge, spin=0, unit="Angstrom", verbose=0)
     mf = scf.RHF(mol).run()
     mc = mcscf.CASCI(mf, 2, 2)
-    e_exact = mc.kernel()[0]            # exact answer inside the 4-qubit space
+    if sigma_bond:
+        mo = mc.sort_mo(_sigma_active_space(mol, mf), base=0)
+        e_exact = mc.kernel(mo)[0]
+    else:
+        e_exact = mc.kernel()[0]        # exact answer inside the 4-qubit space
     h1, ecore = mc.get_h1eff()          # ecore includes nuclear repulsion + frozen core
     h2 = ao2mo.restore(1, mc.get_h2eff(), 2)
     return float(mf.e_tot), float(e_exact), h1, h2, float(ecore)
@@ -209,7 +228,9 @@ def ansatz(theta):
     qc.x(3); qc.cx(2, 3)              # qubit3 = NOT qubit2
     return qc
 
-X0 = np.array([np.pi, np.pi, 0.0])    # starts at the Hartree-Fock state
+# Starts at the Hartree-Fock state. With this choice, knob 0 moves BOTH electrons together
+# (a pair excitation), so the optimizer can't get stuck at Hartree-Fock when bonds stretch.
+X0 = np.array([np.pi, np.pi / 2, -np.pi / 2])
 HF_BITSTRING = "0101"                 # both electrons in the lowest orbital
 
 # --------------------------------------------------------------------------
@@ -330,6 +351,11 @@ def run_vqe(H, runner, shots, maxiter, label=""):
         return e
 
     res = minimize(tracked, X0, method="COBYLA", options={"maxiter": maxiter, "rhobeg": 0.3})
+    # one restart from the best point, with a wider first step, to escape shallow traps
+    res2 = minimize(tracked, res.x, method="COBYLA",
+                    options={"maxiter": max(10, maxiter // 2), "rhobeg": 0.5})
+    if res2.fun < res.fun:
+        res = res2
     if runner.kind == "exact":
         final = float(res.fun)
     else:  # re-measure the best parameters with 4x shots for a cleaner final number
@@ -361,7 +387,7 @@ def compute_molecule(key, runner, shots, maxiter, cache_dir, force):
 
     t = time.time()
     atoms, charge = get_molecule(key)
-    e_hf, e_exact, h1, h2, ecore = classical_reference(atoms, charge)
+    e_hf, e_exact, h1, h2, ecore = classical_reference(atoms, charge, sigma_bond=key.startswith("lih"))
     H = qubit_hamiltonian(h1, h2, ecore)
     check = sector_ground_energy(H)
     if abs(check - e_exact) > 1e-6:
@@ -456,12 +482,56 @@ def export_scan(results, out_dir, solvents):
     _write_rows(rows, out_dir, "evolt_grip_curves")
     print(f"Saved {out_dir}/evolt_grip_curves.json and .csv  (Li+ pulled away from each solvent)")
 
+def export_stretch(results, out_dir):
+    rows = []
+    for d in STRETCH_DISTANCES:
+        r = results[f"lih@{d:.2f}"]
+        shots = sum(r["z_counts"].values()) or 1
+        rows.append({
+            "distance_angstrom": d,
+            "e_hf_simple_method": round(r["e_hf"], 6),
+            "e_exact": round(r["e_exact"], 6),
+            "e_vqe_quantum": round(r["e_vqe"], 6),
+            "vqe_error_mhartree": round(r["error_mhartree"], 3),
+            "simple_method_error_mhartree": round((r["e_hf"] - r["e_exact"]) * 1000, 3),
+            "prob_usual_arrangement_0101": round(r["z_counts"].get("0101", 0) / shots, 4),
+            "prob_both_excited_1010": round(r["z_counts"].get("1010", 0) / shots, 4),
+            "optimizer_steps": r["evaluations"],
+        })
+    _write_rows(rows, out_dir, "evolt_lih_stretch")
+    print("\nStretching the Li-H bond (energies in Hartree):")
+    print("   d(A)   simple(HF)    exact      quantum(VQE)  P(0101)  P(1010)")
+    for r in rows:
+        print(f"  {r['distance_angstrom']:4.1f}  {r['e_hf_simple_method']:11.5f}  {r['e_exact']:11.5f}  "
+              f"{r['e_vqe_quantum']:11.5f}   {r['prob_usual_arrangement_0101']:.2f}     {r['prob_both_excited_1010']:.2f}")
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        d = [r["distance_angstrom"] for r in rows]
+        fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
+        a1.plot(d, [r["e_hf_simple_method"] for r in rows], "o--", label="Simple method (Hartree-Fock)")
+        a1.plot(d, [r["e_exact"] for r in rows], "k-", label="Exact answer")
+        a1.plot(d, [r["e_vqe_quantum"] for r in rows], "s", ms=8, mfc="none", label="Quantum (VQE, Quantum Rings)")
+        a1.set_xlabel("Li-H distance (Angstrom)"); a1.set_ylabel("Energy (Hartree)")
+        a1.set_title("Stretching a bond: the simple method fails, quantum doesn't"); a1.legend()
+        a2.plot(d, [r["prob_usual_arrangement_0101"] for r in rows], "o-", label="0101: usual arrangement")
+        a2.plot(d, [r["prob_both_excited_1010"] for r in rows], "o-", label="1010: both electrons moved")
+        a2.set_xlabel("Li-H distance (Angstrom)"); a2.set_ylabel("Share of measurements")
+        a2.set_title("What the qubits measured"); a2.legend()
+        fig.tight_layout()
+        fig.savefig(os.path.join(out_dir, "lih_stretch.png"), dpi=160)
+        print(f"Saved {out_dir}/evolt_lih_stretch.csv and lih_stretch.png")
+    except Exception as exc:
+        print(f"(lih_stretch.png skipped: {exc})")
+
 def main():
     global LIVE
     ap = argparse.ArgumentParser(description="EVolt Lab VQE engine")
     ap.add_argument("--backend", choices=["exact", "local", "qr"], default="exact")
     ap.add_argument("--only", nargs="*", help="molecule keys, e.g. lih li+ h2o li+h2o li+ec@2.30")
     ap.add_argument("--scan", action="store_true", help="also compute Li+ grip curves vs distance")
+    ap.add_argument("--stretch", action="store_true", help="LiH bond-stretching demo (quantum vs simple method)")
     ap.add_argument("--live", action="store_true", help="print every optimization step (for demos)")
     ap.add_argument("--shots", type=int, default=4096)
     ap.add_argument("--maxiter", type=int, default=60)
@@ -473,7 +543,9 @@ def main():
     cache_dir = os.path.join(args.out, args.backend)
     os.makedirs(cache_dir, exist_ok=True)
     runner = Runner(args.backend)
-    keys = list(args.only or DEFAULT_KEYS)
+    keys = list(args.only or ([] if args.stretch else DEFAULT_KEYS))
+    if args.stretch:
+        keys += [f"lih@{d:.2f}" for d in STRETCH_DISTANCES if f"lih@{d:.2f}" not in keys]
     scan_solvents = list(SOLVENTS) if args.scan else []
     for s in scan_solvents:
         for k in ("li+", s) + tuple(f"li+{s}@{d:.2f}" for d in SCAN_DISTANCES):
@@ -488,6 +560,8 @@ def main():
         export_candidates(results, args.out, args.backend)
     if scan_solvents:
         export_scan(results, args.out, scan_solvents)
+    if args.stretch:
+        export_stretch(results, args.out)
 
 if __name__ == "__main__":
     main()
