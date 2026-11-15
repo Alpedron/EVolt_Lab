@@ -156,6 +156,13 @@ WHAT THE QUANTUM SIMULATOR DOES (for the Quantum Lab charts)
 4. A normal computer turns the knobs to lower the energy, and steps 2 to 4 repeat about 40 times. The convergence chart shows the energy dropping until it lands on the exact answer (the dashed line).
 5. Grip strength = how much lower the energy is when lithium sits next to the solvent than when they are apart. The grip curve repeats this at different distances: the deeper the valley, the tighter the grip.
 
+OUR REAL QUANTUM RESULTS (Quantum Rings, 4 qubits)
+- Grip strength (higher = tighter grip = slower charging): ethylene carbonate (EC) 50.2, dimethyl ether (DME) 48.6, dimethyl carbonate (DMC) 40.8 kilocalories per mole. Every result matched the exact answer within chemical accuracy.
+- These are trends from simplified models (small basis set, approximate molecule shapes), so the absolute numbers run higher than lab measurements. The app uses the differences between liquids.
+
+THE BOND STRETCH DEMO
+Lithium hydride is pulled apart step by step. When bonded, both electrons are shared and a simple method (Hartree-Fock) works. As the bond breaks, each atom wants one electron, and the electrons exist in a mix of arrangements at once. The simple method assumes one fixed arrangement, so its error grows to about 61 milli-Hartree at 5 angstroms, while the quantum algorithm on Quantum Rings stays within about 10, roughly 6 to 9 times more accurate. The qubits show it too: the usual arrangement drops from 100 percent to 42 percent of measurements. Large electrolyte simulations need this kind of quantum description.
+
 WHY EVOLT LAB USES QUANTUM
 The grip between lithium and a solvent molecule is decided by electrons, and electrons follow quantum physics. That grip is hard to measure in a lab, and simulating electrons exactly gets dramatically harder for normal computers as molecules grow. EVolt Lab uses a quantum algorithm as a virtual experiment to estimate it, then feeds the result into the battery model. Today it is 4 qubits and small enough to check on a laptop; the same approach is designed to scale to real electrolyte mixtures that classical computers cannot simulate exactly.
 
