@@ -1,0 +1,194 @@
+[
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 1.6,
+    "interaction_kcal_vqe": -40.64,
+    "interaction_kcal_exact": -40.32
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 1.8,
+    "interaction_kcal_vqe": -46.97,
+    "interaction_kcal_exact": -46.65
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 2.0,
+    "interaction_kcal_vqe": -44.98,
+    "interaction_kcal_exact": -44.64
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 2.3,
+    "interaction_kcal_vqe": -37.56,
+    "interaction_kcal_exact": -37.37
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 2.7,
+    "interaction_kcal_vqe": -28.33,
+    "interaction_kcal_exact": -27.98
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 3.2,
+    "interaction_kcal_vqe": -20.04,
+    "interaction_kcal_exact": -19.69
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 4.0,
+    "interaction_kcal_vqe": -12.5,
+    "interaction_kcal_exact": -12.23
+  },
+  {
+    "solvent": "h2o",
+    "distance_angstrom": 5.0,
+    "interaction_kcal_vqe": -7.86,
+    "interaction_kcal_exact": -7.56
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 1.6,
+    "interaction_kcal_vqe": -31.15,
+    "interaction_kcal_exact": -30.52
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 1.8,
+    "interaction_kcal_vqe": -46.53,
+    "interaction_kcal_exact": -46.36
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 2.0,
+    "interaction_kcal_vqe": -49.31,
+    "interaction_kcal_exact": -49.37
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 2.3,
+    "interaction_kcal_vqe": -45.21,
+    "interaction_kcal_exact": -44.68
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 2.7,
+    "interaction_kcal_vqe": -35.04,
+    "interaction_kcal_exact": -34.76
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 3.2,
+    "interaction_kcal_vqe": -24.59,
+    "interaction_kcal_exact": -24.38
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 4.0,
+    "interaction_kcal_vqe": -14.51,
+    "interaction_kcal_exact": -14.44
+  },
+  {
+    "solvent": "nh3",
+    "distance_angstrom": 5.0,
+    "interaction_kcal_vqe": -8.47,
+    "interaction_kcal_exact": -8.47
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 1.6,
+    "interaction_kcal_vqe": -43.51,
+    "interaction_kcal_exact": -43.29
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 1.8,
+    "interaction_kcal_vqe": -49.2,
+    "interaction_kcal_exact": -49.06
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 2.0,
+    "interaction_kcal_vqe": -46.58,
+    "interaction_kcal_exact": -46.49
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 2.3,
+    "interaction_kcal_vqe": -38.64,
+    "interaction_kcal_exact": -38.49
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 2.7,
+    "interaction_kcal_vqe": -28.57,
+    "interaction_kcal_exact": -28.4
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 3.2,
+    "interaction_kcal_vqe": -19.71,
+    "interaction_kcal_exact": -19.53
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 4.0,
+    "interaction_kcal_vqe": -11.92,
+    "interaction_kcal_exact": -11.7
+  },
+  {
+    "solvent": "dme",
+    "distance_angstrom": 5.0,
+    "interaction_kcal_vqe": -7.28,
+    "interaction_kcal_exact": -7.08
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 1.6,
+    "interaction_kcal_vqe": -46.51,
+    "interaction_kcal_exact": -46.64
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 1.8,
+    "interaction_kcal_vqe": -50.36,
+    "interaction_kcal_exact": -50.09
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 2.0,
+    "interaction_kcal_vqe": -46.89,
+    "interaction_kcal_exact": -46.83
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 2.3,
+    "interaction_kcal_vqe": -39.38,
+    "interaction_kcal_exact": -39.11
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 2.7,
+    "interaction_kcal_vqe": -30.2,
+    "interaction_kcal_exact": -29.98
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 3.2,
+    "interaction_kcal_vqe": -22.3,
+    "interaction_kcal_exact": -22.1
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 4.0,
+    "interaction_kcal_vqe": -15.09,
+    "interaction_kcal_exact": -14.82
+  },
+  {
+    "solvent": "ec",
+    "distance_angstrom": 5.0,
+    "interaction_kcal_vqe": -10.23,
+    "interaction_kcal_exact": -9.96
+  }
+]
