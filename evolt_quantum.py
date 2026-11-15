@@ -87,6 +87,20 @@ DME = ([("O", (0, 0, 0)), ("C", _C1), ("C", _C2)]
        + [("H", h) for h in methyl_hydrogens(_C2, (0, 0, 0))])
 EC, EC_O = ethylene_carbonate()
 
+def dimethyl_carbonate():
+    """Approximate planar DMC (cis-cis), the linear carbonate mixed with EC in most Li-ion cells."""
+    o_carb = np.array([0.0, 1.20, 0.0])
+    atoms = [("C", (0.0, 0.0, 0.0)), ("O", tuple(o_carb))]
+    for sign in (1, -1):
+        o = np.array([sign * 1.16, -0.67, 0.0])
+        a = np.radians(35.0 if sign > 0 else 145.0)
+        c = o + 1.43 * np.array([np.cos(a), np.sin(a), 0.0])
+        atoms += [("O", tuple(o)), ("C", tuple(c))]
+        atoms += [("H", h) for h in methyl_hydrogens(c, o)]
+    return atoms, tuple(o_carb)
+
+DMC, DMC_O = dimethyl_carbonate()
+
 # Each solvent: atoms, the atom Li+ binds to, the direction Li+ approaches from,
 # and a typical Li+...binding-atom distance.
 SOLVENTS = {
@@ -94,6 +108,7 @@ SOLVENTS = {
     "nh3": dict(atoms=NH3, anchor=(0, 0, 0), axis=(0, 0, 1), d_eq=2.01),
     "dme": dict(atoms=DME, anchor=(0, 0, 0), axis=(0, -1, 0), d_eq=1.90),
     "ec":  dict(atoms=EC, anchor=EC_O, axis=(0, 1, 0), d_eq=1.80),
+    "dmc": dict(atoms=DMC, anchor=DMC_O, axis=(0, 1, 0), d_eq=1.80),
 }
 
 CANDIDATES = [
@@ -103,6 +118,8 @@ CANDIDATES = [
      "Fragment of DME, an ether solvent studied for lithium-metal and low-temperature batteries."),
     ("ec", "Ethylene carbonate (EC)",
      "The workhorse solvent in nearly every commercial lithium-ion electrolyte. Approximate geometry."),
+    ("dmc", "Dimethyl carbonate (DMC)",
+     "Thin, runny solvent mixed with EC in most commercial lithium-ion electrolytes. Approximate geometry."),
 ]
 
 def li_complex(solvent, d):

@@ -3,7 +3,7 @@
 **Quantum-powered EV battery design you can talk to.**
 
 🌐 Live app: **[evoltlab.design](https://evoltlab.design)** · backup: [evibe-quantum-lab.base44.app](https://evibe-quantum-lab.base44.app)
-Built by Team EVibe (Adrianna Pedron) at Hack The Nest 2026 (Eastern Michigan University).
+Built by Team EVibe at Hack The Nest 2026 (Eastern Michigan University).
 
 EVolt Lab is a virtual EV battery lab for people with no technical background. You design a battery (the liquid inside it, how much liquid, electrode layer thickness, battery size, outside temperature) and simulate how it could ideally perform: range, fast-charge time, charging power, weight, cost and durability. Volt, a voice assistant, explains every number in plain words and can tune the design for you.
 
@@ -29,7 +29,7 @@ $$E_{\text{bind}} = -\left(E_{\text{Li}^+\cdot\text{solvent}} - E_{\text{Li}^+} 
 - The Jordan–Wigner transformation maps it to a **4-qubit** Hamiltonian.
 - A 3-parameter, particle-conserving ansatz is optimized with **VQE** (COBYLA). Energies are measured from shot counts on the **Quantum Rings** simulator through the Qiskit bridge (`QrBackendV2`).
 - Every result is checked against the exact classical answer (CASCI) for the same active space.
-- Liquids: water and ammonia (model solvents), dimethyl ether (DME) and ethylene carbonate (EC, used in almost every commercial Li-ion electrolyte).
+- Electrolyte solvents: ethylene carbonate (EC) and dimethyl carbonate (DMC), the standard pair in commercial Li-ion cells, and dimethyl ether (DME, the core of the ether solvents studied for cold-weather and lithium-metal batteries). Water and ammonia are computed only as simple validation molecules and are not offered in the app.
 
 ## Files
 
@@ -63,10 +63,9 @@ _Filled in from `results/evolt_candidates.csv` after the Quantum Rings run._
 
 | Liquid | Binding energy, VQE (kcal/mol) | Exact (kcal/mol) | Max error (mHa) |
 |---|---|---|---|
-| Water | | | |
-| Ammonia | | | |
-| DME | | | |
-| EC | | | |
+| Ethylene carbonate (EC) | | | |
+| Dimethyl carbonate (DMC) | | | |
+| Dimethyl ether (DME) | | | |
 
 ## Honest limitations
 
