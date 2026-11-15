@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Secrets: never commit keys
+.env
+*.env
+*secret*
+*token*
+setup_qr.py
+qr_login_test.py
+check_qr.py
+
+# Mac
+.DS_Store
