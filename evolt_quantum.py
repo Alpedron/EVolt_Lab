@@ -442,15 +442,19 @@ def export_candidates(results, out_dir, backend):
             continue
         bind = -(cx["e_vqe"] - li["e_vqe"] - solv["e_vqe"]) * HARTREE_TO_KCAL
         bind_exact = -(cx["e_exact"] - li["e_exact"] - solv["e_exact"]) * HARTREE_TO_KCAL
+        nf = lambda r: r.get("e_ideal_at_params", r["e_vqe"])
+        bind_nf = -(nf(cx) - nf(li) - nf(solv)) * HARTREE_TO_KCAL
         worst = max((li, solv, cx), key=lambda r: abs(r["error_mhartree"]))
         shots = sum(cx["z_counts"].values()) or 1
         rows.append({
             "id": sid, "name": name, "description": desc,
             "binding_energy_kcal": round(bind, 2),
             "binding_energy_exact_kcal": round(bind_exact, 2),
+            "binding_energy_noise_free_kcal": round(bind_nf, 2),
             "vqe_energy_hartree": round(cx["e_vqe"], 6),
             "exact_energy_hartree": round(cx["e_exact"], 6),
             "error_mhartree": round(abs(worst["error_mhartree"]), 3),
+            "error_noise_free_mhartree": round(max(abs(nf(r) - r["e_exact"]) for r in (li, solv, cx)) * 1000, 3),
             "num_qubits": N_QUBITS,
             "convergence": json.dumps(cx["convergence"]),
             "measurement_counts": json.dumps(cx["z_counts"]),
@@ -493,6 +497,8 @@ def export_stretch(results, out_dir):
             "e_exact": round(r["e_exact"], 6),
             "e_vqe_quantum": round(r["e_vqe"], 6),
             "vqe_error_mhartree": round(r["error_mhartree"], 3),
+            "e_vqe_noise_free": round(r.get("e_ideal_at_params", r["e_vqe"]), 6),
+            "noise_free_error_mhartree": round((r.get("e_ideal_at_params", r["e_vqe"]) - r["e_exact"]) * 1000, 3),
             "simple_method_error_mhartree": round((r["e_hf"] - r["e_exact"]) * 1000, 3),
             "prob_usual_arrangement_0101": round(r["z_counts"].get("0101", 0) / shots, 4),
             "prob_both_excited_1010": round(r["z_counts"].get("1010", 0) / shots, 4),
@@ -512,7 +518,8 @@ def export_stretch(results, out_dir):
         fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
         a1.plot(d, [r["e_hf_simple_method"] for r in rows], "o--", label="Simple method (Hartree-Fock)")
         a1.plot(d, [r["e_exact"] for r in rows], "k-", label="Exact answer")
-        a1.plot(d, [r["e_vqe_quantum"] for r in rows], "s", ms=8, mfc="none", label="Quantum (VQE, Quantum Rings)")
+        a1.plot(d, [r["e_vqe_quantum"] for r in rows], "s", ms=8, mfc="none", label="Quantum (VQE, Quantum Rings, measured)")
+        a1.plot(d, [r["e_vqe_noise_free"] for r in rows], "x", ms=8, label="Quantum circuit found (noise-free check)")
         a1.set_xlabel("Li-H distance (Angstrom)"); a1.set_ylabel("Energy (Hartree)")
         a1.set_title("Stretching a bond: the simple method fails, quantum doesn't"); a1.legend()
         a2.plot(d, [r["prob_usual_arrangement_0101"] for r in rows], "o-", label="0101: usual arrangement")
