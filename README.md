@@ -5,6 +5,8 @@
 🌐 Live app: **[evoltlab.design](https://evoltlab.design)** · backup: [evibe-quantum-lab.base44.app](https://evibe-quantum-lab.base44.app)
 Built by Team EVibe at Hack The Nest 2026 (Eastern Michigan University).
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Alpedron/EVolt_Lab/blob/main/evolt_quantum_lab.ipynb)
+
 EVolt Lab is a virtual EV battery lab for people with no technical background. You design a battery (the liquid inside it, how much liquid, electrode layer thickness, battery size, outside temperature) and simulate how it could ideally perform: range, fast-charge time, charging power, weight, cost and durability. Volt, a voice assistant, explains every number in plain words and can tune the design for you.
 
 ## How it fits together
@@ -37,6 +39,7 @@ $$E_{\text{bind}} = -\left(E_{\text{Li}^+\cdot\text{solvent}} - E_{\text{Li}^+} 
 |---|---|
 | `evolt_quantum_lab.ipynb` | Google Colab notebook: run everything step by step on Quantum Rings |
 | `evolt_quantum.py` | The quantum engine (same code the notebook uses) |
+| `runs/evolt_quantum_lab_RUN_2026-11-15.ipynb` | The notebook exactly as we ran it, with all outputs: the record behind our results |
 | `results/` | Output: `evolt_candidates.csv`, `evolt_grip_curves.csv`, per-molecule JSON, `circuit.png` |
 | `volt/volt_agent_setup.md` | Prompt, knowledge base and tools for Volt, the ElevenLabs voice agent |
 
@@ -92,6 +95,21 @@ Near their natural shape, these battery molecules behave simply: the simple clas
 As the bond breaks, the simple method's error grows to 61 mHa while VQE stays within about 10 mHa (6–9× more accurate), and the qubits' measurements shift from one electron arrangement (`0101`, 100% → 42%) to a mix: the kind of electron behaviour the simple method cannot describe. At short distances the quantum and simple results are both close, and sampling noise dominates the small differences. Output: `results/evolt_lih_stretch.csv` and `results/lih_stretch.png`.
 
 The ansatz starts at the Hartree–Fock state with parameters chosen so the first knob moves both electrons together (a pair excitation), plus one optimizer restart, so VQE does not get stuck at the Hartree–Fock answer when correlation is strong.
+
+## Reproducibility
+
+**Run it yourself:** open `evolt_quantum_lab.ipynb` in Colab (badge above), add your own Quantum Rings key as Colab Secrets, and run the cells top to bottom. Package versions we used are in `results/environment.txt`.
+
+**What you should expect:**
+- **Exactly the same:** every classical number (exact energies, Hartree–Fock energies, exact binding energies). These are deterministic.
+- **The same within noise:** VQE results. A quantum computer (or simulator) measures by sampling, so each run gives slightly different numbers, typically within about ±1 mHa at 2,048 shots. More shots means less noise (`--shots 8192`).
+
+**How our published results were produced** (full log in `runs/`): the notebook evolved during the hackathon, so not every molecule used identical settings.
+- LiH, Li⁺, water, ammonia, DME, EC and the grip curves: 2,048 shots, with the original optimizer starting point `[π, π, 0]`.
+- DMC: 8,192 shots, with the improved starting point `[π, π/2, −π/2]` plus one optimizer restart.
+- LiH bond stretch: 2,048 shots, improved starting point.
+
+The current engine uses the improved starting point everywhere. Because these molecules have very little electron correlation near their natural shape, both starting points reach the same answer within noise; for stretched bonds only the improved one is reliable. A clean run of the current notebook reproduces our results within sampling noise.
 
 ## Honest limitations
 
