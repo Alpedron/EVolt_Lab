@@ -58,26 +58,38 @@ python evolt_quantum.py --backend qr --stretch         # LiH bond-stretch demo: 
 ```
 Backends: `exact` (statevector), `local` (Qiskit BasicSimulator with shots), `qr` (Quantum Rings).
 
-## Results (Quantum Rings, 4 qubits, 2,048 shots per measurement)
+## Results (Quantum Rings, 4 qubits)
 
 Binding energy = how tightly the solvent grips a lithium ion (higher = tighter grip = slower charging).
+"Noise-free check" = the energy of the circuit the quantum optimizer found, computed exactly: it separates *did VQE find the right state?* from *how noisy was the sampling?*
 
-| Molecule | Role in app | Binding, VQE on Quantum Rings (kcal/mol) | Exact classical (kcal/mol) | Max energy error (mHa) |
-|---|---|---|---|---|
-| Ethylene carbonate (EC) | Electrolyte option (industry standard) | 50.15 | 50.09 | 0.33 |
-| Dimethyl ether (DME) | Electrolyte option | 48.57 | 48.34 | 0.29 |
-| Dimethyl carbonate (DMC) | Electrolyte option | _pending_ | _pending_ | |
-| Ammonia | Validation molecule only | 48.97 | 49.33 | 1.27 |
-| Water | Validation molecule only | 46.98 | 46.62 | 0.29 |
+| Molecule | Role in app | Binding, VQE on Quantum Rings (kcal/mol) | Noise-free check (kcal/mol) | Exact (kcal/mol) | Max energy error, measured (mHa) |
+|---|---|---|---|---|---|
+| Ethylene carbonate (EC) | Electrolyte option (industry standard) | 50.15 | 50.66 | 50.09 | 0.33 |
+| Dimethyl ether (DME) | Electrolyte option | 48.57 | 48.93 | 48.34 | 0.29 |
+| Dimethyl carbonate (DMC) | Electrolyte option | 40.84 | 41.62 | 40.05 | 1.00 |
+| Ammonia | Validation molecule only | 48.97 | 49.23 | 49.33 | 1.27 |
+| Water | Validation molecule only | 46.98 | 47.36 | 46.62 | 0.29 |
 
-- **Every VQE energy is within chemical accuracy (1.6 mHa) of the exact answer**, and every VQE binding energy is within 0.4 kcal/mol of the exact one.
-- The ordering (EC grips tightest) matches the expected trend for carbonate vs. ether solvents.
-- Absolute values are higher than published gas-phase measurements (e.g. about 34 kcal/mol for Li⁺–water), as expected for a small basis set, fixed geometries and no basis-set-superposition correction. EVolt Lab uses the **differences between solvents**, not the absolute values.
+- **Every measured VQE energy is within chemical accuracy (1.6 mHa) of the exact answer.** Binding energies are within 0.8 kcal/mol of exact.
+- Shots: 2,048 per measurement (8,192 for DMC, the largest molecule, to reduce sampling noise).
+- EC grips lithium tightest, consistent with carbonate vs. ether trends. DMC and DME use approximate, unoptimized geometries, so their relative order should be read as a model trend.
+- Absolute values are higher than published gas-phase measurements (e.g. about 34 kcal/mol for Li⁺–water), as expected for a small basis set, fixed geometries and no basis-set-superposition correction. EVolt Lab uses the **differences between solvents**.
 - Grip curves (`results/evolt_grip_curves.csv`): 32 additional VQE runs pulling Li⁺ away from each molecule; VQE and exact curves agree within 0.7 kcal/mol at every point.
 
 ### Why quantum? The LiH bond-stretch demo
 
-Near their natural shape, these battery molecules behave simply: the simple classical method (Hartree–Fock) is already close, and the quantum circuit confirms the exact answer. To show where quantum methods matter, `--stretch` pulls a Li–H bond apart from 1.0 to 5.0 Å. As the bond stretches, the simple method drifts away from the exact answer while VQE on Quantum Rings stays on it, and the qubits' measurements shift from one electron arrangement (`0101`) to a mix including `1010`, the kind of electron behaviour the simple method cannot describe. Output: `results/evolt_lih_stretch.csv` and `results/lih_stretch.png`.
+Near their natural shape, these battery molecules behave simply: the simple classical method (Hartree–Fock) is already close, and the quantum circuit confirms the exact answer. To show where quantum methods matter, `--stretch` pulls a Li–H bond apart from 1.0 to 5.0 Å (9 VQE runs on Quantum Rings).
+
+| Li–H distance (Å) | Simple method error (mHa) | Quantum, measured (mHa) | Quantum, noise-free check (mHa) | Measurements "both electrons moved" (1010) |
+|---|---|---|---|---|
+| 1.6 | 0.1 | 0.4 | 0.1 | 0% |
+| 3.0 | 1.3 | 1.7 | 0.9 | 0% |
+| 3.5 | 4.1 | 4.0 | 1.4 | 1.7% |
+| 4.0 | 13.4 | 2.7 | 3.8 | 1.8% |
+| 5.0 | **60.8** | **9.5** | **7.1** | **17.4%** |
+
+As the bond breaks, the simple method's error grows to 61 mHa while VQE stays within about 10 mHa (6–9× more accurate), and the qubits' measurements shift from one electron arrangement (`0101`, 100% → 42%) to a mix: the kind of electron behaviour the simple method cannot describe. At short distances the quantum and simple results are both close, and sampling noise dominates the small differences. Output: `results/evolt_lih_stretch.csv` and `results/lih_stretch.png`.
 
 The ansatz starts at the Hartree–Fock state with parameters chosen so the first knob moves both electrons together (a pair excitation), plus one optimizer restart, so VQE does not get stuck at the Hartree–Fock answer when correlation is strong.
 
