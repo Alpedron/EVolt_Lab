@@ -7,7 +7,7 @@ Built by Team EVibe at Hack The Nest 2026 (Eastern Michigan University).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Alpedron/EVolt_Lab/blob/main/evolt_quantum_lab.ipynb)
 
-EVolt Lab is a virtual EV battery lab for people with no technical background. You design a battery (the liquid inside it, how much liquid, electrode layer thickness, battery size, outside temperature) and simulate how it could ideally perform: range, fast-charge time, charging power, weight, cost and durability. Volt, a voice assistant, explains every number in plain words and can tune the design for you.
+EVolt Lab helps everyday drivers understand EV batteries before they switch. It's a simplified battery simulator for people with no technical background. You design a battery (the liquid inside it, how much liquid, electrode layer thickness, battery size, outside temperature) and simulate how it could ideally perform: range, fast-charge time, charging power, weight, cost and durability. Volt, a voice assistant, explains every number in plain words and can tune the design for you.
 
 ## How it fits together
 
@@ -113,7 +113,7 @@ The current engine uses the improved starting point everywhere. Because these mo
 
 ## Honest limitations
 
-- Quantum Rings **simulates** a quantum computer on a classical machine; nothing here ran on quantum hardware.
+- Quantum Rings **simulates** a quantum computer on a classical machine; nothing here ran on quantum hardware. The 4-qubit model is small enough for a laptop to solve exactly, on purpose, so every quantum answer could be verified. **No quantum advantage is claimed**: the project builds and validates the workflow on a real battery-chemistry problem. Chemistry is a leading candidate for future advantage because the classical cost of exact simulation doubles with every orbital added.
 - 4 qubits and one solvent molecule per lithium ion: results show **trends**, not real-world electrolyte values. Real electrolytes surround each lithium ion with several solvent molecules and salt ions. Geometries are fixed, not optimized.
 - The battery pack model in the app is deliberately simplified to show tradeoffs. Real batteries are affected by many more factors.
 
